@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴딜 공장 생산 일자 현황</title>
+
+    <!-- 스타일시트 연결 -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 헤더 영역: 제목 및 파일 선택 버튼 -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>🏭 뉴딜 공장 생산 일자 현황</h1>
+                <p class="subtitle">생산일지 CSV 파일을 업로드하여 실시간 통계 및 생산 데이터를 확인하세요.</p>
+            </div>
+            
+            <!-- 파일 업로드 컨트롤 -->
+            <div class="file-upload-box">
+                <label for="csvFileInput" class="file-label">
+                    <span class="file-icon">📁</span>
+                    <span class="file-btn-text">CSV 파일 선택하기</span>
+                </label>
+                <input type="file" id="csvFileInput" accept=".csv" />
+                <span id="fileNameDisplay" class="file-name-display">선택된 파일 없음</span>
+            </div>
+        </header>
+
+        <!-- 데이터 미선택 시 나타나는 안내 화면 -->
+        <div id="emptyState" class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h2>분석할 생산일지 CSV 파일을 선택해주세요</h2>
+            <p>위의 'CSV 파일 선택하기' 버튼을 누르고 코팅 설비 생산일지 데이터(.csv)를 선택하면 대시보드가 그려집니다.</p>
+        </div>
+
+        <!-- 대시보드 본문 영역 (CSV 파일 선택 후 표시됨) -->
+        <main id="dashboardMain" class="dashboard-main hidden">
+            
+            <!-- 1. 요약 카드 영역 (총 롤 수, 불량률, 가동률, 총 로스시간) -->
+            <section class="summary-cards-grid">
+                <!-- 카드 1: 총 롤 수 -->
+                <div class="card card-total">
+                    <div class="card-title">총 생산 롤 수</div>
+                    <div class="card-value" id="cardTotalRolls">0</div>
+                    <div class="card-unit">개 (Rolls)</div>
+                </div>
+
+                <!-- 카드 2: 불량률 (%) -->
+                <div class="card card-defect">
+                    <div class="card-title">불량률</div>
+                    <div class="card-value" id="cardDefectRate">0.0</div>
+                    <div class="card-unit">%</div>
+                </div>
+
+                <!-- 카드 3: 가동률 (%) -->
+                <div class="card card-oprate">
+                    <div class="card-title">설비 가동률</div>
+                    <div class="card-value" id="cardOperationRate">0.0</div>
+                    <div class="card-unit">%</div>
+                </div>
+
+                <!-- 카드 4: 총 로스시간 -->
+                <div class="card card-loss">
+                    <div class="card-title">총 로스시간</div>
+                    <div class="card-value" id="cardTotalLoss">0.0</div>
+                    <div class="card-unit">분</div>
+                </div>
+            </section>
+
+            <!-- 2. 차트 영역: 첫 줄 3개, 둘째 줄 2개 구조로 정리 -->
+            <section class="charts-grid charts-top-grid">
+                <!-- 설비별 생산 롤 수 (많은 순) -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>📊 설비별 생산 롤 수 <span class="badge">많은 순</span></h3>
+                    </div>
+                    <div id="equipmentChart" class="bar-chart-container compact-chart-container">
+                        <!-- JS에서 세로 막대 그래프가 동적으로 그려집니다 -->
+                    </div>
+                </div>
+
+                <!-- 일자별 생산 롤 수 (날짜순) -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>📅 일자별 생산 롤 수 <span class="badge">날짜 순</span></h3>
+                    </div>
+                    <div id="dateChart" class="bar-chart-container compact-chart-container">
+                        <!-- JS에서 세로 막대 그래프가 동적으로 그려집니다 -->
+                    </div>
+                </div>
+
+                <!-- 생산 모델별 생산 롤 수 -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>🏷️ 생산 모델별 생산 롤 수 <span class="badge">모델별</span></h3>
+                    </div>
+                    <div id="modelChart" class="bar-chart-container compact-chart-container">
+                        <!-- JS에서 모델별 생산량 막대 그래프가 동적으로 그려집니다 -->
+                    </div>
+                </div>
+            </section>
+
+            <section class="charts-grid charts-bottom-grid">
+                <!-- 생산별 로스시간 변화량 -->
+                <div class="chart-card compact-card">
+                    <div class="chart-header">
+                        <h3>📉 생산별 로스 시간 변화량 <span class="badge">전일 대비</span></h3>
+                    </div>
+                    <div id="lossChangeChart" class="bar-chart-container compact-chart-container">
+                        <!-- JS에서 일자별 로스시간 증감량 막대 그래프가 동적으로 그려집니다 -->
+                    </div>
+                </div>
+
+                <!-- 설비별 생산시간 및 로스시간 비교 -->
+                <div class="chart-card compact-card">
+                    <div class="chart-header">
+                        <h3>⏱️ 설비별 생산 및 로스시간 <span class="badge">비교</span></h3>
+                    </div>
+                    <div id="equipmentTimeChart" class="time-compare-chart compact-chart-container">
+                        <!-- JS에서 설비별 생산시간, 로스시간 비교 막대 그래프가 그려집니다 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. 전체 데이터 테이블 영역 (NG 요약 + NG 행 배경색 강조) -->
+            <section class="table-card">
+                <div class="table-header">
+                    <h3>📋 Data</h3>
+                    <div class="table-legend">
+                        <span class="legend-item legend-ng">■ NG (불량) 강조 표시</span>
+                    </div>
+                </div>
+
+                <!-- Data 상단에 NG 항목 요약 정보를 추가해 한눈에 파악할 수 있도록 구성 -->
+                <div id="ngSummaryPanel" class="data-summary-panel" aria-live="polite">
+                    <!-- JS에서 NG 총건수, 비율, 모델 목록을 동적으로 렌더링 -->
+                </div>
+
+                <!-- NG만 따로 모아 보여주는 테이블: 전체 데이터 위쪽에 배치 -->
+                <div id="ngOnlySection" class="ng-only-section">
+                    <div class="ng-only-header">
+                        <h4>NG만 모아보기</h4>
+                    </div>
+                    <div class="table-wrapper ng-only-wrapper">
+                        <table id="ngOnlyTable" class="data-table ng-only-table">
+                            <thead id="ngTableHead">
+                                <!-- NG 데이터용 헤더 -->
+                            </thead>
+                            <tbody id="ngTableBody">
+                                <!-- NG 데이터만 동적으로 표시 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="dataTable" class="data-table">
+                        <thead id="tableHead">
+                            <!-- JS에서 CSV 헤더 열을 동적으로 생성합니다 -->
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- JS에서 CSV 데이터 행을 동적으로 생성합니다 -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- 대시보드 로직 자바스크립트 -->
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

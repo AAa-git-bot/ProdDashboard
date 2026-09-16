@@ -1,0 +1,586 @@
+/* ==========================================================================
+   뉴딜 공장 생산 일자 대시보드 스타일시트 (style.css)
+   - 라이브러리 없이 순수 CSS로 작성된 반응형 대시보드 레이아웃
+   - 생산 데이터 시각화, NG 강조, 세로 막대 그래프, 데이터 요약 정보를 모두 포함
+   ========================================================================== */
+
+/* 1. 기본 스타일 및 디자인 토큰 설정 */
+:root {
+    --primary-color: #2563eb;        /* 메인 블루 */
+    --primary-hover: #1d4ed8;
+    --bg-main: #f8fafc;              /* 전체 배경 */
+    --card-bg: #ffffff;              /* 카드 배경 */
+    --text-primary: #0f172a;          /* 기본 텍스트 */
+    --text-secondary: #64748b;        /* 보조 텍스트 */
+    --border-color: #e2e8f0;          /* 경계선 */
+
+    --color-total: #3b82f6;           /* 총 롤 수 */
+    --color-defect: #ef4444;          /* 불량률 */
+    --color-oprate: #10b981;          /* 가동률 */
+    --color-loss: #f59e0b;            /* 로스시간 */
+
+    --ng-bg: #fef2f2;                /* NG 행 배경 */
+    --ng-text: #991b1b;               /* NG 텍스트 */
+    --ng-border: #fca5a5;
+
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans KR", sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    line-height: 1.5;
+    padding: 24px;
+}
+
+/* 2. 전체 대시보드 레이아웃 */
+.dashboard-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* 3. 헤더 영역 */
+.dashboard-header {
+    background-color: var(--card-bg);
+    padding: 24px 32px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-content h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.file-upload-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-upload-box input[type="file"] {
+    display: none;
+}
+
+.file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.file-label:hover {
+    background-color: var(--primary-hover);
+}
+
+.file-label:active {
+    transform: scale(0.98);
+}
+
+.file-name-display {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 4. 빈 상태 화면 */
+.empty-state {
+    background-color: var(--card-bg);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.empty-state h2 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* 5. 요약 카드 */
+.summary-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    padding: 20px 24px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    border-top: 4px solid var(--border-color);
+}
+
+.card-total { border-top-color: var(--color-total); }
+.card-defect { border-top-color: var(--color-defect); }
+.card-oprate { border-top-color: var(--color-oprate); }
+.card-loss { border-top-color: var(--color-loss); }
+
+.card-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.card-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.card-unit {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* 6. 차트 영역 */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.charts-top-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.charts-bottom-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.chart-card {
+    background-color: var(--card-bg);
+    padding: 18px 18px 14px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    min-width: 0;
+}
+
+.compact-card {
+    min-height: 300px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chart-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+}
+
+/* 세로 막대 그래프 공통 스타일 */
+.bar-chart-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    align-items: end;
+    gap: 10px;
+    width: 100%;
+    min-height: 200px;
+    padding-top: 10px;
+    overflow-x: auto;
+}
+
+.compact-chart-container {
+    min-height: 180px;
+}
+
+.bar-chart-item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    width: 100%;
+}
+
+.bar-chart-value {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    min-height: 16px;
+}
+
+.bar-chart-track {
+    width: 100%;
+    max-width: 50px;
+    height: 135px;
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.bar-chart-fill {
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    transition: height 0.5s ease-in-out;
+    box-shadow: inset 0 -6px 10px rgba(255, 255, 255, 0.18);
+}
+
+.bar-chart-fill.positive {
+    background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+}
+
+.bar-chart-fill.negative {
+    background: linear-gradient(180deg, #fca5a5 0%, #ef4444 100%);
+}
+
+.bar-chart-label {
+    width: 100%;
+    font-size: 0.7rem;
+    text-align: center;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.time-compare-chart {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    align-items: end;
+    gap: 14px;
+    width: 100%;
+    min-height: 260px;
+    overflow-x: auto;
+    padding: 8px 4px 0;
+}
+
+.equipment-time-group {
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 6px 2px;
+}
+
+.equipment-time-bars {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 8px;
+    height: clamp(180px, 30vh, 260px);
+}
+
+.equipment-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    width: 24px;
+}
+
+.equipment-bar-value {
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.equipment-bar-track {
+    width: 100%;
+    max-width: 22px;
+    height: clamp(150px, 24vh, 220px);
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.equipment-bar {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    min-height: 6px;
+}
+
+.production-fill {
+    background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+.loss-fill {
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.equipment-time-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+.empty-chart {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    min-height: 150px;
+}
+
+/* 7. Data 영역 */
+.table-card {
+    background-color: var(--card-bg);
+    padding: 24px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.table-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.legend-item {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.legend-ng {
+    background-color: var(--ng-bg);
+    color: var(--ng-text);
+    border: 1px solid var(--ng-border);
+}
+
+.data-summary-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.ng-only-section {
+    margin-bottom: 18px;
+    padding: 16px;
+    background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 100%);
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+}
+
+.ng-only-header {
+    margin-bottom: 12px;
+}
+
+.ng-only-header h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ng-text);
+}
+
+.ng-only-wrapper {
+    max-height: 260px;
+    border-color: #fecaca;
+}
+
+.summary-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px 14px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+}
+
+.summary-chip-wide {
+    grid-column: span 2;
+}
+
+.chip-label {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.summary-chip strong {
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    max-height: 480px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.data-table th, .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.data-table th {
+    background-color: #f1f5f9;
+    color: var(--text-secondary);
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.data-table tr.row-ng {
+    background-color: var(--ng-bg) !important;
+    color: var(--ng-text);
+    font-weight: 600;
+}
+
+.badge-ng {
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: #ef4444;
+    color: #ffffff;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.badge-ok {
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: #10b981;
+    color: #ffffff;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 980px) {
+    .charts-top-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .charts-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .charts-top-grid,
+    .charts-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .equipment-time-group {
+        min-width: 70px;
+    }
+
+    .summary-chip-wide {
+        grid-column: auto;
+    }
+}
